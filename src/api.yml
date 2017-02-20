@@ -1,0 +1,297 @@
+swagger: '2.0'
+info:
+    title: Cogo API
+    description: Allows programmatic interaction with the Cogo platform
+    version: 1.0.0
+    license:
+        name: Apache 2.0
+        url: https://github.com/davojc/cogo/blob/develop/LICENSE
+host: "api.cogo.me"
+schemes:
+ - http
+basePath: "/v1"
+consumes:
+ - application/json
+produces:
+ - application/json
+paths:
+  /me:
+    get:
+      description: The User Profile endpoint returns information about the Uber user that has authorized with the application.
+      responses:
+        200:
+          description: Profile information for the user
+          schema:
+            $ref: '#/definitions/Profile'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /history:
+    get:
+      description: The user activity endpoint returns data about the users' lifetime activity with Cogo
+      responses:
+        200:
+          description: Activity history information for the user
+          schema:
+            $ref: '#/definitions/Activities'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /groups:
+    get:
+      description: The group ownership and membership for the user.
+      responses:
+        200:
+          description: Groups information for the user
+          schema:
+            $ref: '#/definitions/Groups'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      description: Creates a new group owned by the user.
+      parameters:
+        - name: group
+          in: body
+          description: Group to add
+          required: true
+          schema:
+            $ref: '#/definitions/NewGroup'
+      responses:
+        200:
+          description: Group created successfully
+          schema:
+            $ref: '#/definitions/Group'
+        default:
+          description: Unexpected Error
+          schema:
+            $ref: '#/definitions/Error'
+  /groups/{id}:
+    get:
+      description: Returns the group detail for the given group ID.
+      parameters:
+        - name: id
+          in: path
+          description: ID of the group to fetch
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: Group response
+          schema:
+            $ref: '#/definitions/Group'
+        default:
+          description: Unexpected Error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      description: Deletes a single group based on the ID supplied
+      parameters:
+        - name: id
+          in: path
+          description: ID of the group to delete
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: Event deleted
+          schema:
+            $ref: '#/definitions/Group'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /events:
+    get:
+      description: The events created by or attended by the user.
+      responses:
+        200:
+          description: Events information for the user
+          schema:
+            $ref: '#/definitions/Events'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      description: Creates a new event owned by the user.
+      parameters:
+        - name: event
+          in: body
+          description: Event to add
+          required: true
+          schema:
+            $ref: '#/definitions/NewEvent'
+      responses:
+        200:
+          description: Event created successfully.
+          schema:
+            $ref: '#/definitions/Event'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /events/{id}:
+    get:
+      description: Returns the event detail for the given event ID.
+      parameters:
+        - name: id
+          in: path
+          description: ID of the event to fetch
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: Event response
+          schema:
+            $ref: '#/definitions/Event'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      description: Deletes a single event based on the ID supplied
+      parameters:
+        - name: id
+          in: path
+          description: ID of the event to delete
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: Event deleted
+          schema:
+            $ref: '#/definitions/Event'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Pagination:
+    type: object
+    properties:
+      offset:
+        type: integer
+        format: int32
+        description: Position in pagination.
+      limit:
+        type: integer
+        format: int32
+        description: Number of items to retrieve (100 max).
+      count:
+        type: integer
+        format: int32
+        description: Total number of items available.
+  Profile:
+    type: object
+    required:
+      - firstName
+      - lastName
+      - email
+    properties:
+      firstName:
+        type: string
+        description: First name of the Cogo user.
+      lastName:
+        type: string
+        description: Last name of the Cogo user.
+      email:
+        type: string
+        description: Email address of the Cogo user.
+      picture:
+        type: string
+        description: Image URL of the Cogo user.
+  Activity:
+    type: object
+    properties:
+      uuid:
+        type: string
+        description: Unique identifier for the activity.
+      detail:
+        type: string
+        description: The detail about the activity.
+  Activities:
+    allOf:
+      - $ref: '#/definitions/Pagination'
+      - type: object
+        properties:
+          history:
+            type: array
+            items:
+              $ref: '#/definitions/Activity'
+  NewGroup:
+    type: object
+    required:
+      - name
+      - description
+    properties:
+      name:
+        type: string
+        description: Name of the group
+      description:
+        type: string
+        description: Description of the group.
+  Group:
+    allOf:
+      - $ref: '#/definitions/NewGroup'
+      - type: object
+        required:
+          - uuid
+        properties:
+          uuid:
+            type: string
+            description: Unique identifier for the Group.
+  Groups:
+    allOf:
+      - $ref: '#/definitions/Pagination'
+      - type: object
+        properties:
+          groups:
+            type: array
+            items:
+              $ref: '#/definitions/Group'
+  NewEvent:
+    type: object
+    required:
+      - name
+      - description
+    properties:
+      name:
+        type: string
+        description: Name of the event
+      description:
+        type: string
+        description: Description of the event
+  Event:
+    allOf:
+      - $ref: '#/definitions/NewEvent'
+      - type: object
+        properties:
+          uuid:
+            type: string
+            description: Unique identifier for the Event.  
+  Events:
+    allOf:
+      - $ref: '#/definitions/Pagination'
+      - type: object
+        required:
+          - uuid
+        properties:
+          events:
+            type: array
+            items:
+              $ref: '#/definitions/Event'
+  Error:
+    type: object
+    required:
+      - message
+    properties:
+      message:
+        type: string
