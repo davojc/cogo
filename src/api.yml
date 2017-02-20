@@ -173,6 +173,49 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /events/{id}/resources:
+    get:
+      description: Returns the list of resources for the given event.
+      parameters:
+        - name: id
+          in: path
+          description: ID of the event to get the resources for
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: Resources responses
+          schema:
+            $ref: '#/definitions/Resources'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      description: Post a resource for a given event
+      parameters:
+        - name: id 
+          in: path
+          description: ID of the event to add a resource to
+          required: true
+          type: integer
+          format: int64
+        - name: resource
+          in: body
+          description: Description of the resource to add to the event
+          required: true
+          schema:
+            $ref: '#/definitions/NewResource'
+      responses:
+        200:
+          description: Resource added
+          schema:
+            $ref: '#/definitions/Resource'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 definitions:
   Pagination:
     type: object
@@ -264,7 +307,7 @@ definitions:
       - description
     properties:
       name:
-        type: string
+        type: string                                                                                         
         description: Name of the event
       description:
         type: string
@@ -273,6 +316,8 @@ definitions:
     allOf:
       - $ref: '#/definitions/NewEvent'
       - type: object
+        required:
+          - uuid
         properties:
           uuid:
             type: string
@@ -281,13 +326,50 @@ definitions:
     allOf:
       - $ref: '#/definitions/Pagination'
       - type: object
-        required:
-          - uuid
         properties:
           events:
             type: array
             items:
               $ref: '#/definitions/Event'
+  NewResource:
+    type: object
+    required:
+      - name
+      - description
+      - type
+      - uri
+    properties:
+      name:
+        type: string                                                                                         
+        description: Name of the event
+      description:
+        type: string
+        description: Description of the event
+      type:
+        type: string
+        description: Mime Type of the resource
+      uri:
+        type: string
+        description: Uri of the resource
+  Resource:
+    allOf:
+      - $ref: '#/definitions/NewResource'
+      - type: object
+        required:
+          - uuid
+        properties:
+          uuid:
+            type: string
+            description: Unique identifier for the Event.  
+  Resources:
+    allOf:
+      - $ref: '#/definitions/Pagination'
+      - type: object
+        properties:
+          events:
+            type: array
+            items:
+              $ref: '#/definitions/Resource'
   Error:
     type: object
     required:
